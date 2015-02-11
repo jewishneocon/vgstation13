@@ -12,14 +12,44 @@
 	..()
 	update_icon()
 
+/obj/machinery/computer/aifixer/proc/load_ai(var/mob/living/silicon/ai/transfer, var/obj/item/device/aicard/card, var/mob/user)
+	if(!transfer) return
+	transfer << "You have been uploaded to a stationary terminal. Sadly, there is no remote from here."
+	user << "<span class='notice'>Transfer successful</span>: [transfer.name] ([rand(1000,9999)].exe) installed and executed successfully. Local copy has been removed."
+	
+	transfer.loc = src
+	transfer.cancel_camera()
+	transfer.control_disabled = 1
+	occupant = transfer
+	
+	if(card)
+		card.clear()
+		
+	update_icon()
+	
 /obj/machinery/computer/aifixer/attackby(I as obj, user as mob)
 	if(istype(I, /obj/item/device/aicard))
 		if(stat & (NOPOWER|BROKEN))
 			user << "This terminal isn't functioning right now, get it working!"
 			return
-		I:transfer_ai("AIFIXER","AICARD",src,user)
+		var/obj/item/device/aicard/card = I
+		var/mob/living/silicon/ai/comp_ai = locate() in src
+		var/mob/living/silicon/ai/card_ai = locate() in card
+		
+		if(istype(comp_ai))
+			if(active)
+				user << "<span class='danger'>ERROR</span>: Reconstruction in progress."
+				return
+			card.grab_ai(comp_ai, user)
+			if(!(locate(/mob/living/silicon/ai) in src)) occupant = null
+		else if(istype(card_ai))
+			load_ai(card_ai, card, user)
+			occupant = locate(/mob/living/silicon/ai) in src
+
+		update_icon()
 		return
-	return ..()
+	..()
+	return
 
 /obj/machinery/computer/aifixer/attack_ai(var/mob/user as mob)
 	src.add_hiddenprint(user)
@@ -31,14 +61,8 @@
 /obj/machinery/computer/aifixer/attack_hand(var/mob/user as mob)
 	if(..())
 		return
-
-	if(ishuman(user))//Checks to see if they are ninja
-		if(istype(user:gloves, /obj/item/clothing/gloves/space_ninja)&&user:gloves:candrain&&!user:gloves:draining)
-			if(user:wear_suit:s_control)
-				user:wear_suit.transfer_ai("AIFIXER","NINJASUIT",src,user)
-			else
-				user << "\red <b>ERROR</b>: \black Remote access channel disabled."
-			return
+		
+	user.set_machine(src)		
 	var/dat = "<h3>AI System Integrity Restorer</h3><br><br>"
 
 	if (src.occupant)
@@ -73,8 +97,6 @@
 			dat += "<br><br>Reconstruction in process, please wait.<br>"
 	dat += {" <A href='?src=\ref[user];mach_close=computer'>Close</A>"}
 
-
-	user.set_machine(src)
 
 	user << browse(dat, "window=computer;size=400x500")
 	onclose(user, "computer")
@@ -117,7 +139,7 @@
 
 /obj/machinery/computer/aifixer/update_icon()
 	..()
-	overlays = 0
+	overlays.len = 0
 	// Broken / Unpowered
 	if(stat & (BROKEN | NOPOWER))
 		return

@@ -131,6 +131,16 @@ Class Procs:
 
 	languages = ALL
 
+/obj/machinery/power_drain(var/drain_check)
+	if(drain_check)
+		return 1
+	if(!powered())
+		return 0
+	var/area/area = get_area(src)
+	if(!apc)
+		return 0
+	return apc.drain_power()
+	
 /obj/machinery/cultify()
 	var/list/random_structure = list(
 		/obj/structure/cult/talisman,
