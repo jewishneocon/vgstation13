@@ -191,7 +191,7 @@ obj/item/weapon/wirerod/attackby(var/obj/item/I, mob/user as mob)
 		user << "<span class='notice'>You fasten the wirecutters to the top of the rod with the cable, prongs outward.</span>"
 		del(I)
 		del(src)
-		
+
 /obj/item/weapon/star
 	name = "shuriken"
 	desc = "A sharp, perfectly weighted piece of metal."
@@ -200,11 +200,12 @@ obj/item/weapon/wirerod/attackby(var/obj/item/I, mob/user as mob)
 	throw_speed = 10
 	throwforce =  15
 	throw_range = 15
-	sharp = 1
 	edge =  1
-	matter = list("metal" = 500)
-
+	//matter = list("metal" = 500)
 	var/poisoned = 0
+
+/obj/item/weapon/star/is_sharp()
+	return 1
 
 /obj/item/weapon/star/New()
 	..()
@@ -223,7 +224,7 @@ obj/item/weapon/wirerod/attackby(var/obj/item/I, mob/user as mob)
 /obj/item/weapon/star/ninja
 	color = "#007700"
 	poisoned = 1
-	
+
 /obj/item/weapon/energy_net
 	name = "energy net"
 	desc = "It's a net made of green energy."
@@ -232,16 +233,16 @@ obj/item/weapon/wirerod/attackby(var/obj/item/I, mob/user as mob)
 	throwforce = 0
 	force = 0
 	var/net_type = /obj/effect/energy_net
-	
+
 /obj/item/weapon/energy_net/dropped()
 	spawn(10)
 		if(src) del(src)
-		
+
 /obj/item/weapon/energy_net/throw_impact(atom/hit_atom)
 	..()
 	var/mob/living/M = hit_atom
 	if(!istype(M) || locate(/obj/effect/energy_net) in M.loc)
-		del(src)
+		qdel(src)
 		return 0
 	var/turf/T = get_turf(M)
 	if(T)
@@ -253,8 +254,8 @@ obj/item/weapon/wirerod/attackby(var/obj/item/I, mob/user as mob)
 		del(src)
 	// If we miss or hit an obstacle, we still want to delete the net.
 	spawn(10)
-		if(src) del(src
-		
+		if(src) qdel(src)
+
 /obj/effect/energy_net
 	name = "energy net"
 	desc = "It's a net made of green energy."
@@ -268,14 +269,14 @@ obj/item/weapon/wirerod/attackby(var/obj/item/I, mob/user as mob)
 	var/mob/living/affecting = null //Who it is currently affecting, if anyone.
 	var/mob/living/master = null    //Who shot web. Will let this person know if the net was successful.
 	var/countdown = -1
-	
+
 /obj/effect/energy_net/teleport
 	countdown = 60
-	
+
 /obj/effect/energy_net/New()
 	..()
 	processing_objects |= src
-	
+
 /obj/effect/energy_net/Del()
 	if(affecting)
 		var/mob/living/carbon/M = affecting
@@ -284,14 +285,14 @@ obj/item/weapon/wirerod/attackby(var/obj/item/I, mob/user as mob)
 		M << "You are free of the net!"
 	processing_objects -= src
 	..()
-	
+
 /obj/effect/energy_net/proc/healthcheck()
 	if(health <=0)
 		density = 0
 		src.visible_message("The energy net is torn apart!")
 		del(src)
 	return
-	
+
 /obj/effect/energy_net/process()
 	if(isnull(affecting) || affecting.loc != loc)
 		del(src)
@@ -319,24 +320,24 @@ obj/item/weapon/wirerod/attackby(var/obj/item/I, mob/user as mob)
 	playsound(affecting.loc, 'sound/effects/sparks2.ogg', 50, 1)
 	anim(affecting.loc,affecting,'icons/mob/mob.dmi',,"phasein",,affecting.dir)
 	del(src)
-	
+
 /obj/effect/energy_net/bullet_act(var/obj/item/projectile/Proj)
 	health -= Proj.damage
 	healthcheck()
 	return 0
-	
+
 /obj/effect/energy_net/ex_act()
 	health = 0
 	healthcheck()
-	
+
 /obj/effect/energy_net/blob_act()
 	health = 0
 	healthcheck()
-	
+
 /obj/effect/energy_net/meteorhit()
 	health = 0
 	healthcheck()
-	
+
 /obj/effect/energy_net/attack_hand(var/mob/user)
 	var/mob/living/carbon/human/H = user
 	if(istype(H))
@@ -352,8 +353,8 @@ obj/item/weapon/wirerod/attackby(var/obj/item/I, mob/user as mob)
 	H << "<span class='danger'>You claw at the energy net.</span>"
 	healthcheck()
 	return
-	
+
 /obj/effect/energy_net/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	health -= W.force
 	healthcheck()
-	..() 
+	..()

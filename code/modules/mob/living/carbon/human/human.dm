@@ -1043,7 +1043,7 @@
 		if(!src.head:up)
 			number += 2
 	if(istype(src.back, /obj/item/weapon/rig))
-		var/obj/item/weapon/rig/O = b
+		var/obj/item/weapon/rig/O = src.back
 		if(O.helmet && O.helmet == head && (O.helmet.body_parts_covered & EYES))
 			number += 2
 	if(istype(src.head, /obj/item/clothing/head/helmet/space))
@@ -1726,7 +1726,7 @@
 					threatcount += 2
 
 	//Check for dresscode violations
-	if(istype(head, /obj/item/clothing/head/wizard) || istype(head, /obj/item/clothing/head/helmet/space/rig/wizard))
+	if(istype(head, /obj/item/clothing/head/wizard) || istype(head, /obj/item/clothing/head/helmet/space/void/wizard))
 		threatcount += 2
 
 	//Loyalty implants imply trustworthyness

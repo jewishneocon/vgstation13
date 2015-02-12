@@ -137,10 +137,13 @@ Class Procs:
 	if(!powered())
 		return 0
 	var/area/area = get_area(src)
+	if(!area)
+		return 0
+	var/obj/machinery/power/apc/apc = area.get_apc()
 	if(!apc)
 		return 0
 	return apc.drain_power()
-	
+
 /obj/machinery/cultify()
 	var/list/random_structure = list(
 		/obj/structure/cult/talisman,
