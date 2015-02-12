@@ -19,7 +19,7 @@
 
 	log_attack("<font color='red'>[user.name] ([user.ckey]) used the [src.name] to card [M.name] ([M.ckey])</font>")
 
-	transfer_ai("AICORE", "AICARD", M, user)
+	//transfer_ai("AICORE", "AICARD", M, user)
 
 	playsound(get_turf(src), 'sound/machines/paistartup.ogg', 50, 1)
 	return
@@ -118,19 +118,19 @@
 					overlays += image('icons/obj/pda.dmi', "aicard-on")
 	attack_self(U)
 
-	
+
 /obj/item/device/aicard/proc/grab_ai(var/mob/living/silicon/ai/ai, var/mob/living/user)
 
 	if(!ai.client)
-		user << "\red <b>ERROR</b>: \black [name] data core is offline. Unable to download."
+		user << "<span class='danger'>ERROR</span>: [name] data core is offline. Unable to download."
 		return 0
 
 	if(locate(/mob/living/silicon/ai) in src)
-		user << "\red <b>Transfer failed</b>: \black Existing AI found on remote terminal. Remove existing AI to install a new one."
+		user << "<span class='danger'>Transfer failed</span>: Existing AI found on remote terminal. Remove existing AI to install a new one."
 		return 0
 
 	if(ai.is_malf())
-		user << "\red <b>ERROR</b>: \black Remote transfer interface disabled."
+		user << "<span class='danger'>ERROR</span>: Remote transfer interface disabled."
 		return 0
 
 	if(istype(ai.loc, /turf/))
@@ -142,7 +142,7 @@
 	ai.cancel_camera()
 	ai.control_disabled = 1
 	ai.aiRestorePowerRoutine = 0
-	ai.aiRadio.disabledAi = 1
+	//ai.aiRadio.disabledAi = 1
 
 	ai.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has been carded with [src.name] by [user.name] ([user.ckey])</font>")
 	user.attack_log += text("\[[time_stamp()]\] <font color='red'>Used the [src.name] to card [ai.name] ([ai.ckey])</font>")
@@ -151,7 +151,7 @@
 	if(ai.client)
 		ai << "You have been downloaded to a mobile storage device. Remote access lost."
 	if(user.client)
-		user << "\blue <b>Transfer successful</b>: \black [ai.name] ([rand(1000,9999)].exe) removed from host terminal and stored within local memory."
+		user << "<span class='notice'>Transfer successful</span>: [ai.name] ([rand(1000,9999)].exe) removed from host terminal and stored within local memory."
 
 	update_icon()
 	return 1
@@ -174,8 +174,8 @@
 			icon_state = "aicard-full"
 	else
 		icon_state = "aicard"
-	
-	
+
+
 /obj/item/device/aicard/ex_act(severity)
 	switch(severity)
 		if(1.0)

@@ -48,6 +48,9 @@ var/global/list/ghdel_profiling = list()
 /atom/proc/beam_disconnect(var/obj/effect/beam/B)
 	beams.Remove(B)
 
+/atom/proc/drain_power(var/drain_check, var/surge)
+	return -1
+
 /atom/proc/throw_impact(atom/hit_atom, var/speed)
 	if(istype(hit_atom,/mob/living))
 		var/mob/living/M = hit_atom

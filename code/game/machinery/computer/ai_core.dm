@@ -161,7 +161,7 @@
 
 	transfer.aiRestorePowerRoutine = 0
 	transfer.control_disabled = 0
-	transfer.aiRadio.disabledAi = 0
+	//transfer.aiRadio.disabledAi = 0
 	transfer.loc = get_turf(src)
 	transfer.cancel_camera()
 	user << "\blue <b>Transfer successful</b>: \black [transfer.name] ([rand(1000,9999)].exe) downloaded to host terminal. Local copy wiped."
@@ -171,7 +171,7 @@
 		card.clear()
 
 	qdel(src)
-	
+
 /obj/structure/AIcore/deactivated/proc/check_malf(var/mob/living/silicon/ai/ai)
 	if(!ai) return
 	if(ticker.mode.name == "AI malfunction")
@@ -179,8 +179,8 @@
 		for(var/datum/mind/malfai in malf.malf_ai)
 			if(ai.mind == malfai)
 				return 1
-	
-/obj/stucture/AIcore/deactivated/attackby(var/obj/item/device/aicard/card, var/mob/user)
+
+/obj/structure/AIcore/deactivated/attackby(var/obj/item/device/aicard/card, var/mob/user)
 	if(istype(card))
 		var/mob/living/silicon/ai/transfer = locate() in card
 		if(transfer)

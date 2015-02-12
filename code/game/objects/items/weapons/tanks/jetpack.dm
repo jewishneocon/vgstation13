@@ -33,7 +33,7 @@
 		icon_state = initial(icon_state)
 //			item_state = initial(item_state)
 		ion_trail.stop()
-		
+
 	usr << "You toggle the thrusters [on ? "on" : "off"]."
 	return
 
@@ -72,15 +72,15 @@
 	. = ..()
 	air_contents.adjust((6 * ONE_ATMOSPHERE) * volume / (R_IDEAL_GAS_EQUATION * T20C))
 
-	
+
 /obj/item/weapon/tank/jetpack/rig
 	name = "jetpack"
 	var/obj/item/weapon/rig/holder
-	
+
 /obj/item/weapon/tank/jetpack/rig/examine()
 	usr << "It's a jetpack. If you can see this, report it on the bug tracker."
 	return 0
-	
+
 /obj/item/weapon/tank/jetpack/rig/allow_thrust(num, mob/living/user as mob)
 
 	if(!(src.on))
@@ -97,13 +97,13 @@
 
 	var/datum/gas_mixture/G = pressure_vessel.air_contents.remove(num)
 
-	var/allgases = G.gas["carbon_dioxide"] + G.gas["nitrogen"] + G.gas["oxygen"] + G.gas["phoron"]
-	if(allgases >= 0.005)
-		return 1
+//	var/allgases = G.gas["carbon_dioxide"] + G.gas["nitrogen"] + G.gas["oxygen"] + G.gas["phoron"]
+//	if(allgases >= 0.005)
+//		return 1
 	del(G)
 	return
 /obj/item/weapon/tank/jetpack/rig/allow_thrust
-	
+
 /obj/item/weapon/tank/jetpack/oxygen
 	name = "Jetpack (Oxygen)"
 	desc = "A tank of compressed oxygen for use as propulsion in zero-gravity areas. Use with caution."
