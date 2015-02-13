@@ -141,6 +141,7 @@ BLIND     // can't see anything
 	slot_flags = SLOT_HEAD
 	species_restricted = list("exclude","Muton")
 	var/light_overlay = "helmet_light"
+	var/light_applied
 	var/brightness_on
 	var/on = 0
 
@@ -154,8 +155,12 @@ BLIND     // can't see anything
 		if(!isturf(user.loc))
 			user << "You cannot turn the light on while in this [user.loc]"
 			return
-	on = !on
-	overlays.Cut()
+		on = !on
+		user << "You [on ? "enable" : "disable"] the helmet light."
+		update_light(user)
+	else
+		return ..(user)
+	/*overlays.Cut()
 	if(on)
 		if(!light_overlay_cache["[light_overlay]_icon"])
 			light_overlay_cache["[light_overlay]_icon"] = image("icon" = 'icons/obj/light_overlays.dmi', "icon_state" = "[light_overlay]")
@@ -172,18 +177,28 @@ BLIND     // can't see anything
 
 	else
 		return ..(user)
+	*/
 
 /obj/item/clothing/head/proc/update_light(mob/user)
-	if(!brightness_on)
-		return
-	if(on)
-		if(light_overlay) overlays |= light_overlay
-		user.SetLuminosity(user.luminosity - brightness_on)
+	if(on && !light_applied)
+		if(loc == user)
+			user.SetLuminosity(user.luminosity + brightness_on)
 		SetLuminosity(brightness_on)
+		light_applied = 1
+	else if(!on && light_applied)
+		if(loc == user)
+			user.SetLuminosity(user.luminosity - brightness_on)
+		SetLuminosity(0)
+		light_applied = 0
+	update_icon(user)
 
 /obj/item/clothing/head/equipped(mob/user)
 	..()
-	update_light(user)
+	spawn(1)
+		if(on && loc == user && !light_applied)
+			user.SetLuminosity(user.luminosity + brightness_on)
+			light_applied = 1
+
 
 /obj/item/clothing/head/pickup(mob/user)
 	..()
@@ -191,7 +206,11 @@ BLIND     // can't see anything
 
 /obj/item/clothing/head/dropped(mob/user)
 	..()
-	update_light(user)
+	spawn(1)
+		if(on && loc != user && light_applied)
+			user.SetLuminosity(user.luminosity - brightness_on)
+			light_applied = 0
+
 
 //Mask
 /obj/item/clothing/mask
