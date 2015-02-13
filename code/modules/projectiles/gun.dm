@@ -53,6 +53,9 @@
 		for(var/obj/O in contents)
 			O.emp_act(severity)
 
+/obj/item/weapon/gun/proc/load_into_chamber()
+	return 0
+
 /obj/item/weapon/gun/afterattack(atom/A as mob|obj|turf|area, mob/living/user as mob|obj, flag, params)
 	if(flag)	return //we're placing gun on a table or in backpack
 	if(istype(target, /obj/machinery/recharger) && istype(src, /obj/item/weapon/gun/energy))	return//Shouldnt flag take care of this?
