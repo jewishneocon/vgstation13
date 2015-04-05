@@ -1,8 +1,8 @@
 /datum/pipeline
 	var/datum/gas_mixture/air
 
-	var/list/obj/machinery/atmospherics/pipe/members
-	var/list/obj/machinery/atmospherics/pipe/edges //Used for building networks
+	var/list/obj/machinery/atmospherics/pipe/members = list()
+	var/list/obj/machinery/atmospherics/pipe/edges = list() //Used for building networks
 
 	var/datum/pipe_network/network
 
@@ -10,10 +10,6 @@
 	var/last_pressure_check=0
 
 	var/const/PRESSURE_CHECK_DELAY=5 // 5s delay between pchecks to give pipenets time to recover.
-
-/datum/pipeline/Del()
-	Destroy()
-	return ..()
 
 /datum/pipeline/Destroy()
 	if(network) //For the pipenet rebuild
@@ -24,6 +20,11 @@
 	//Null the fuck out of all these references
 	for(var/obj/machinery/atmospherics/pipe/M in members) //Edges are a subset of members
 		M.parent = null
+
+/datum/pipeline/resetVariables()
+	..("members", "edges")
+	members = list()
+	edges = list()
 
 /datum/pipeline/proc/process()//This use to be called called from the pipe networks
 	if((world.timeofday - last_pressure_check) / 10 >= PRESSURE_CHECK_DELAY)
@@ -63,8 +64,6 @@
 		member.air_temporary.update_values()
 
 /datum/pipeline/proc/build_pipeline(obj/machinery/atmospherics/pipe/base)
-	air = new
-
 	var/list/possible_expansions = list(base)
 	members = list(base)
 	edges = list()
@@ -107,6 +106,7 @@
 			possible_expansions -= borderline
 
 	air.volume = volume
+	air.update_values()
 
 /datum/pipeline/proc/network_expand(datum/pipe_network/new_network, obj/machinery/atmospherics/pipe/reference)
 

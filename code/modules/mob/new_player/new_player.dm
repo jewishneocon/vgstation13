@@ -298,9 +298,15 @@
 			count += (officer.current_positions + warden.current_positions + hos.current_positions)
 			if(job.current_positions > (config.assistantratio * count))
 				if(count >= 5) // if theres more than 5 security on the station just let assistants join regardless, they should be able to handle the tide
-					return 1
-				return 0
-	return 1
+					. = 1
+				else
+					return 0
+	if(job.title == "Assistant" && job.current_positions > 5)
+		var/datum/job/officer = job_master.GetJob("Security Officer")
+		if(officer.current_positions >= officer.total_positions)
+			officer.total_positions++
+	. = 1
+	return
 
 /mob/new_player/proc/FuckUpGenes(var/mob/living/carbon/human/H)
 	// 20% of players have bad genetic mutations.
@@ -326,6 +332,7 @@
 	job_master.AssignRole(src, rank, 1)
 
 	var/mob/living/carbon/human/character = create_character()	//creates the human and transfers vars and mind
+	if(character.client.prefs.randomslot) character.client.prefs.random_character_sqlite(character, character.ckey)
 	job_master.EquipRank(character, rank, 1)					//equips the human
 	EquipCustomItems(character)
 	character.loc = pick(latejoin)

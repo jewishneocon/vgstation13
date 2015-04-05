@@ -304,7 +304,7 @@
 		var/datum/organ/external/affecting = get_organ(ran_zone(dam_zone))
 		var/armor = run_armor_check(affecting, "melee")
 		apply_damage(damage, BRUTE, affecting, armor)
-		src.visible_message("<span class='danger'>[M] [M.attacktext] [src] in \the [affecting.display_name]!</span>", 1)
+		src.visible_message("<span class='danger'>[M] [M.attacktext] [src] in \the [affecting.display_name]!</span>")
 
 
 /mob/living/carbon/human/proc/is_loyalty_implanted(mob/living/carbon/human/M)
@@ -1034,24 +1034,21 @@
 
 	return
 
-///eyecheck()
-///Returns a number between -1 to 2
+/**
+ * Returns a number between -1 to 2.
+ * TODO: What's the default return value?
+ */
 /mob/living/carbon/human/eyecheck()
-	var/number = 0
-	if(istype(src.head, /obj/item/clothing/head/welding))
-		if(!src.head:up)
-			number += 2
-	if(istype(src.head, /obj/item/clothing/head/helmet/space))
-		number += 2
-	if(istype(src.glasses, /obj/item/clothing/glasses/thermal))
-		number -= 1
-	if(istype(src.glasses, /obj/item/clothing/glasses/sunglasses))
-		number += 1
-	if(istype(src.glasses, /obj/item/clothing/glasses/welding))
-		var/obj/item/clothing/glasses/welding/W = src.glasses
-		if(!W.up)
-			number += 2
-	return number
+	var/obj/item/clothing/head/headwear = src.head
+	var/obj/item/clothing/glasses/eyewear = src.glasses
+
+	if (headwear)
+		. += headwear.eyeprot
+
+	if (eyewear)
+		. += eyewear.eyeprot
+
+	return Clamp(., -1, 2)
 
 
 /mob/living/carbon/human/IsAdvancedToolUser()
@@ -1195,14 +1192,22 @@
 	check_dna()
 
 	visible_message("<span class='notice'>\The [src] morphs and changes [get_visible_gender() == MALE ? "his" : get_visible_gender() == FEMALE ? "her" : "their"] appearance!</span>", "<span class='notice'>You change your appearance!</span>", "<span class='warning'>Oh, god!  What the hell was that?  It sounded like flesh getting squished and bone ground into a different shape!</span>")
-/mob/living/carbon/human/proc/can_mind_interact(mob/M)
+/mob/living/carbon/human/proc/can_mind_interact(var/mob/M)
+	//world << "Starting can interact on [M]"
 	if(!ishuman(M)) return 0 //Can't see non humans with your fancy human mind.
+	//world << "[M] is a human"
 	var/turf/temp_turf = get_turf(M)
+	var/turf/our_turf = get_turf(src)
 	if(!temp_turf)
+		//world << "[M] is in null space"
 		return 0
-	if((temp_turf.z != 1 && temp_turf.z != 5) || M.stat!=CONSCIOUS) //Not on mining or the station. Or dead
+	if((temp_turf.z != our_turf.z) || M.stat!=CONSCIOUS) //Not on the same zlevel as us or they're dead.
+		//world << "[(temp_turf.z != our_turf.z) ? "not on the same zlevel as [M]" : "[M] is not concious"]"
+		src << "Cannot establish a telepathic link with [M]."
 		return 0
 	if(M_PSY_RESIST in M.mutations)
+		//world << "[M] has psy resist"
+		src << "Cannot maintain a telepathic link with [M]."
 		return 0
 	return 1
 

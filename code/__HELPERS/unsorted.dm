@@ -111,45 +111,6 @@ Turf and target are seperate in case you want to teleport some distance from a t
 
 	return destination
 
-
-
-/proc/LinkBlocked(turf/A, turf/B)
-	if(A == null || B == null) return 1
-	var/adir = get_dir(A,B)
-	var/rdir = get_dir(B,A)
-	if((adir & (NORTH|SOUTH)) && (adir & (EAST|WEST)))	//	diagonal
-		var/iStep = get_step(A,adir&(NORTH|SOUTH))
-		if(!LinkBlocked(A,iStep) && !LinkBlocked(iStep,B)) return 0
-
-		var/pStep = get_step(A,adir&(EAST|WEST))
-		if(!LinkBlocked(A,pStep) && !LinkBlocked(pStep,B)) return 0
-		return 1
-
-	if(DirBlocked(A,adir)) return 1
-	if(DirBlocked(B,rdir)) return 1
-	return 0
-
-
-/proc/DirBlocked(turf/loc,var/dir)
-	for(var/obj/structure/window/D in loc)
-		if(!D.density)			continue
-		if(D.is_fulltile())	return 1
-		if(D.dir == dir)		return 1
-
-	for(var/obj/machinery/door/D in loc)
-		if(!D.density)			continue
-		if(istype(D, /obj/machinery/door/window))
-			if((dir & SOUTH) && (D.dir & (EAST|WEST)))		return 1
-			if((dir & EAST ) && (D.dir & (NORTH|SOUTH)))	return 1
-		else return 1	// it's a real, air blocking door
-	return 0
-
-/proc/TurfBlockedNonWindow(turf/loc)
-	for(var/obj/O in loc)
-		if(O.density && !istype(O, /obj/structure/window))
-			return 1
-	return 0
-
 /proc/sign(x)
 	return x!=0?x/abs(x):0
 
@@ -613,10 +574,11 @@ Turf and target are seperate in case you want to teleport some distance from a t
 
 // returns turf relative to A offset in dx and dy tiles
 // bound to map limits
-/proc/get_offset_target_turf(var/atom/A, var/dx, var/dy)
-	var/x = min(world.maxx, max(1, A.x + dx))
-	var/y = min(world.maxy, max(1, A.y + dy))
-	return locate(x,y,A.z)
+/proc/get_offset_target_turf(atom/A, dx, dy)
+	var/x = Clamp(A.x + dx, 1, world.maxx)
+	var/y = Clamp(A.y + dy, 1, world.maxy)
+
+	return locate(x, y, A.z)
 
 //returns random gauss number
 proc/GaussRand(var/sigma)
@@ -734,9 +696,8 @@ proc/anim(turf/location as turf,target as mob|obj,a_icon,a_icon_state as text,fl
 	var/Location = user.loc
 	var/holding = user.get_active_hand()
 
-	for(var/i = 0, i<numticks, i++)
+	for (var/i = 1 to numticks)
 		sleep(delayfraction)
-
 
 		if(!user || user.stat || user.weakened || user.stunned || !(user.loc == Location))
 			return 0
@@ -1168,20 +1129,25 @@ proc/get_mob_with_client_list()
 
 
 /proc/parse_zone(zone)
-	if(zone == "r_hand") return "right hand"
-	else if (zone == "l_hand") return "left hand"
-	else if (zone == "l_arm") return "left arm"
-	else if (zone == "r_arm") return "right arm"
-	else if (zone == "l_leg") return "left leg"
-	else if (zone == "r_leg") return "right leg"
-	else if (zone == "l_foot") return "left foot"
-	else if (zone == "r_foot") return "right foot"
-	else if (zone == "l_hand") return "left hand"
-	else if (zone == "r_hand") return "right hand"
-	else if (zone == "l_foot") return "left foot"
-	else if (zone == "r_foot") return "right foot"
-	else return zone
-
+	switch(zone)
+		if ("r_hand")
+			return "right hand"
+		if ("l_hand")
+			return "left hand"
+		if ("l_arm")
+			return "left arm"
+		if ("r_arm")
+			return "right arm"
+		if ("l_leg")
+			return "left leg"
+		if ("r_leg")
+			return "right leg"
+		if ("l_foot")
+			return "left foot"
+		if ("r_foot")
+			return "right foot"
+		else
+			return zone
 
 /proc/get_turf(const/atom/O)
 	if (isnull(O) || isarea(O))
@@ -1298,11 +1264,7 @@ var/list/WALLITEMS = list(
 
 
 proc/get_angle(atom/a, atom/b)
-    return atan2(b.y - a.y, b.x - a.x)
-
-proc/atan2(x, y)
-	if(!x && !y) return 0
-	return y >= 0 ? arccos(x / sqrt(x * x + y * y)) : -arccos(x / sqrt(x * x + y * y))
+    return Atan2(b.y - a.y, b.x - a.x)
 
 proc/rotate_icon(file, state, step = 1, aa = FALSE)
 	var icon/base = icon(file, state)
@@ -1334,6 +1296,10 @@ proc/rotate_icon(file, state, step = 1, aa = FALSE)
 	if(O.edge) return 1
 	return 0
 
-/proc/isEmag(obj/O)
-	if(!O) return 0
-	return istype(O, /obj/item/weapon/card/emag)
+proc/find_holder_of_type(var/atom/reference,var/typepath) //Returns the first object holder of the type you specified
+	var/atom/location = reference.loc //ie /mob to find the first mob holding it
+	while(!istype(location,/turf) && !istype(location,null))
+		if(istype(location,typepath))
+			return location
+		location = location.loc
+	return 0

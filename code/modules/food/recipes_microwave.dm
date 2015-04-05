@@ -1109,6 +1109,7 @@
 		/obj/item/weapon/reagent_containers/food/snacks/grown/goldapple,
 		)
 	result = /obj/item/weapon/reagent_containers/food/snacks/aesirsalad
+	reagents_forbidden = list("synaptizine")
 
 /datum/recipe/validsalad
 	items = list(
@@ -1169,6 +1170,50 @@
 		/obj/item/weapon/reagent_containers/food/snacks/grown/tomato,
 		)
 	result = /obj/item/weapon/reagent_containers/food/snacks/curry/xeno
+
+// Chips ///////////////////////////////////////////////////////
+
+/datum/recipe/chips
+	reagents = list ("sodiumchloride" = 2)
+	items = list (/obj/item/weapon/reagent_containers/food/snacks/grown/potato)
+	result = /obj/item/weapon/reagent_containers/food/snacks/chips/cookable
+
+/datum/recipe/vinegarchips
+	reagents = list ("sodiumchloride" = 2, "vinegar" = 5)
+	items = list(/obj/item/weapon/reagent_containers/food/snacks/grown/potato)
+	result = /obj/item/weapon/reagent_containers/food/snacks/chips/cookable/vinegar
+
+/datum/recipe/cheddarchips
+	reagents = list ("sodiumchloride" = 2)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/grown/potato,
+		/obj/item/weapon/reagent_containers/food/snacks/cheesewedge,
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/chips/cookable/cheddar
+
+/datum/recipe/clownchips
+	reagents = list ("banana" = 20)
+	items = list(/obj/item/weapon/reagent_containers/food/snacks/grown/potato)
+	result = /obj/item/weapon/reagent_containers/food/snacks/chips/cookable/clown
+
+/datum/recipe/nuclearchips
+	reagents = list ("uranium" = 10, "sodiumchloride" = 2)
+	items = list(/obj/item/weapon/reagent_containers/food/snacks/grown/potato)
+	result = /obj/item/weapon/reagent_containers/food/snacks/chips/cookable/nuclear
+
+/datum/recipe/commiechips
+	reagents = list ("sodiumchloride" = 2, "vodka" = 10)
+	items = list(/obj/item/weapon/reagent_containers/food/snacks/grown/potato)
+	result = /obj/item/weapon/reagent_containers/food/snacks/chips/cookable/communist
+
+/datum/recipe/xenochips
+	reagents = list ("sodiumchloride " = 2)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/grown/potato,
+		/obj/item/weapon/reagent_containers/food/snacks/xenomeat,
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/chips/cookable/xeno
+
 
 // Misc ////////////////////////////////////////////////////////
 
@@ -1267,6 +1312,93 @@
 		/obj/item/weapon/reagent_containers/food/snacks/rawchicken,
 		)
 	result = /obj/item/weapon/storage/fancy/chicken_bucket
+
+/datum/recipe/gigapuddi
+	reagents = list("milk" = 15)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/egg,
+		/obj/item/weapon/reagent_containers/food/snacks/egg,
+		/obj/item/weapon/reagent_containers/food/snacks/chocolatebar
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/gigapuddi
+
+/datum/recipe/gigapuddi/happy
+	reagents = list("milk" = 15, "sugar" = 5)
+	result = /obj/item/weapon/reagent_containers/food/snacks/gigapuddi/happy
+
+/datum/recipe/gigapuddi/anger
+	reagents = list("milk" = 15, "sodiumchloride" = 5)
+	result = /obj/item/weapon/reagent_containers/food/snacks/gigapuddi/anger
+
+/datum/recipe/flan
+	reagents = list("milk" = 5)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/egg
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/flan
+
+/datum/recipe/omurice
+	reagents = list("rice" = 5, "ketchup" = 5)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/egg
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/omurice
+
+/datum/recipe/omurice/heart
+	reagents = list("rice" = 5, "ketchup" = 5, "sugar" = 5)
+	result = /obj/item/weapon/reagent_containers/food/snacks/omurice/heart
+
+/datum/recipe/bluespace
+	reagents = list("milk" = 5, "flour" = 5)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/egg,
+		/obj/item/weapon/reagent_containers/food/snacks/grown/berries,
+		/obj/item/bluespace_crystal
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/muffin/bluespace
+
+/datum/recipe/yellowcake
+	reagents = list("uranium" = 5, "radium" = 10)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/egg,
+		/obj/item/weapon/reagent_containers/food/snacks/egg,
+		/obj/item/weapon/reagent_containers/food/snacks/egg,
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/yellowcake
+
+/datum/recipe/yellowcupcake
+	reagents = list("uranium" = 2, "radium" = 5)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/egg)
+	result = /obj/item/weapon/reagent_containers/food/snacks/yellowcupcake
+
+/datum/recipe/cookiebowl
+	reagents = list("flour" = 5, "sugar" = 2)
+	items = list (
+		/obj/item/weapon/reagent_containers/food/snacks/egg,
+		/obj/item/weapon/reagent_containers/food/snacks/chocolatebar
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/cookiebowl
+
+/datum/recipe/chococherrycake
+	reagents = list("milk" = 5, "flour" = 15)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/egg,
+		/obj/item/weapon/reagent_containers/food/snacks/egg,
+		/obj/item/weapon/reagent_containers/food/snacks/egg,
+		/obj/item/weapon/reagent_containers/food/snacks/chocolatebar,
+		/obj/item/weapon/reagent_containers/food/snacks/chocolatebar,
+		/obj/item/weapon/reagent_containers/food/snacks/grown/cherries,
+		/obj/item/weapon/reagent_containers/food/snacks/grown/cherries
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/sliceable/chococherrycake
+
+/datum/recipe/pumpkinbread
+	reagents = list("flour" = 15)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/grown/pumpkin
+		)
+	result = /obj/item/weapon/reagent_containers/food/snacks/sliceable/pumpkinbread
 
 // Currently Disabled //////////////////////////////////////////
 
