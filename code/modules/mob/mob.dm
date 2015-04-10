@@ -139,8 +139,9 @@
 	return 0
 
 /mob/proc/Life()
-	if(spell_master)
-		spell_master.update_spells(0, src)
+	if(spell_masters && spell_masters.len)
+		for(var/obj/screen/movable/spell_master/spell_master in spell_masters)
+			spell_master.update_spells(0, src)
 	return
 
 /mob/proc/see_narsie(var/obj/machinery/singularity/narsie/large/N, var/dir)
@@ -1097,7 +1098,7 @@ var/list/slot_equipment_priority = list( \
 			else
 				stat(null, "Garbage Controller is not running.")
 
-			if(processScheduler.getIsRunning())
+			if(processScheduler && processScheduler.getIsRunning())
 				var/datum/controller/process/process
 
 				process = processScheduler.getProcess("vote")

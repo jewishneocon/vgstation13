@@ -108,6 +108,8 @@ var/list/admin_verbs_fun = list(
 	/client/proc/editappear,
 	/client/proc/commandname,
 	/client/proc/delete_all_adminbus,
+	/client/proc/delete_all_bomberman,
+	/client/proc/create_bomberman_arena,
 	/client/proc/gib_money, // /vg/
 	/client/proc/smissmas,
 	)
@@ -174,6 +176,7 @@ var/list/admin_verbs_debug = list(
 #ifdef PROFILE_MACHINES
 	/client/proc/cmd_admin_dump_macprofile,
 #endif
+	/client/proc/debugNatureMapGenerator
 	)
 var/list/admin_verbs_possess = list(
 	/proc/possess,
