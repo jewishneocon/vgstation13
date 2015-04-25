@@ -338,7 +338,10 @@ var/list/score=list(
 	"dmgestname"    = null, // who had the most damage on the shuttle (but was still alive)
 	"dmgestjob"     = null,
 	"dmgestdamage"  = 0,
-	"dmgestkey"     = null
+	"dmgestkey"     = null,
+
+	"arenafights"   = 0,
+	"arenabest"		= null,
 )
 
 // Mostly used for ban systems.
@@ -358,3 +361,22 @@ var/global/obj/item/device/radio/intercom/universe/announcement_intercom = new
 
 //used by jump-to-area etc. Updated by area/updateName()
 var/list/sortedAreas = list()
+
+var/global/bomberman_mode = 0
+var/global/bomberman_hurt = 0
+var/global/bomberman_destroy = 0
+
+var/global/list/volunteer_gladiators = list()
+var/global/list/ready_gladiators = list()
+var/global/list/never_gladiators = list()
+
+var/global/list/achievements = list()
+
+//icons that appear on the Round End pop-up browser
+var/global/list/end_icons = list()
+
+var/global/list/arena_leaderboard = list()
+var/arena_rounds = 0
+var/arena_top_score = 0
+
+var/endgame_info_logged = 0

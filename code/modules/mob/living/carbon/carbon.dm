@@ -34,7 +34,7 @@
 		if(prob(40))
 			for(var/mob/M in hearers(4, src))
 				if(M.client)
-					M.show_message(text("\red You hear something rumbling inside [src]'s stomach..."), 2)
+					M.show_message(text("<span class='warning'>You hear something rumbling inside [src]'s stomach...</span>"), 2)
 			var/obj/item/I = user.get_active_hand()
 			if(I && I.force)
 				var/d = rand(round(I.force / 4), I.force)
@@ -50,7 +50,7 @@
 					src.take_organ_damage(d)
 				for(var/mob/M in viewers(user, null))
 					if(M.client)
-						M.show_message(text("\red <B>[user] attacks [src]'s stomach wall with the [I.name]!"), 2)
+						M.show_message(text("<span class='warning'><B>[user] attacks [src]'s stomach wall with the [I.name]!</span>"), 2)
 				playsound(user.loc, 'sound/effects/attackblob.ogg', 50, 1)
 
 				if(prob(src.getBruteLoss() - 50))
@@ -66,7 +66,7 @@
 		M.loc = src.loc
 		for(var/mob/N in viewers(src, null))
 			if(N.client)
-				N.show_message(text("\red <B>[M] bursts out of [src]!</B>"), 2)
+				N.show_message(text("<span class='danger'>[M] bursts out of [src]!</span>"), 2)
 	. = ..()
 
 /mob/living/carbon/proc/share_contact_diseases(var/mob/M)
@@ -84,7 +84,7 @@
 		if (M.hand)
 			temp = M:organs_by_name["l_hand"]
 		if(temp && !temp.is_usable())
-			M << "\red You can't use your [temp.display_name]"
+			M << "<span class='warning'>You can't use your [temp.display_name]</span>"
 			return
 	share_contact_diseases(M)
 	return
@@ -161,8 +161,8 @@
 		if(src == M && istype(src, /mob/living/carbon/human))
 			var/mob/living/carbon/human/H = src
 			src.visible_message( \
-				text("\blue [src] examines [].",src.gender==MALE?"himself":"herself"), \
-				"\blue You check yourself for injuries." \
+				text("<span class='notice'>[src] examines [].</span>",src.gender==MALE?"himself":"herself"), \
+				"<span class='notice'>You check yourself for injuries.</span>" \
 				)
 
 			for(var/datum/organ/external/org in H.organs)
@@ -196,7 +196,7 @@
 					status = "weirdly shapen."
 				if(status == "")
 					status = "OK"
-				src.show_message(text("\t []My [] is [].",status=="OK"?"\blue ":"\red ",org.display_name,status),1)
+				src.show_message(text("\t []My [] is [].",status=="OK"?"<span class='notice'></span>":"<span class='danger'></span>",org.display_name,status),1)
 			if((SKELETON in H.mutations) && (!H.w_uniform) && (!H.wear_suit))
 				H.play_xylophone()
 		else if(lying) // /vg/: For hugs. This is how update_icon figgers it out, anyway.  - N3X15
@@ -216,8 +216,8 @@
 			AdjustWeakened(-3)
 			playsound(get_turf(src), 'sound/weapons/thudswoosh.ogg', 50, 1, -1)
 			M.visible_message( \
-				"\blue [M] shakes [src] trying to wake [t_him] up!", \
-				"\blue You shake [src] trying to wake [t_him] up!", \
+				"<span class='notice'>[M] shakes [src] trying to wake [t_him] up!</span>", \
+				"<span class='notice'>You shake [src] trying to wake [t_him] up!</span>", \
 				)
 		// BEGIN HUGCODE - N3X
 		else
@@ -226,8 +226,8 @@
 				H.w_uniform.add_fingerprint(M)
 			playsound(get_turf(src), 'sound/weapons/thudswoosh.ogg', 50, 1, -1)
 			M.visible_message( \
-				"\blue [M] gives [src] a [pick("hug","warm embrace")].", \
-				"\blue You hug [src].", \
+				"<span class='notice'>[M] gives [src] a [pick("hug","warm embrace")].</span>", \
+				"<span class='notice'>You hug [src].</span>", \
 				)
 			reagents.add_reagent("paracetamol", 1)
 
@@ -248,83 +248,55 @@
 
 // ++++ROCKDTBEN++++ MOB PROCS //END
 
-/mob/living/proc/handle_ventcrawl() // -- TLE -- Merged by Carn
+/mob/living/proc/handle_ventcrawl(var/atom/clicked_on) // -- TLE -- Merged by Carn
 	diary << "[src] is ventcrawling."
 	if(!stat)
 		if(!lying)
 
-			var/obj/machinery/atmospherics/unary/vent_pump/vent_found
-			for(var/obj/machinery/atmospherics/unary/vent_pump/v in range(1,src))
-				if(!v.welded)
-					vent_found = v
-				else
-					src << "\red That vent is welded."
+/*
+			if(clicked_on)
+				world << "We start with [clicked_on], and [clicked_on.type]"
+*/
+			var/obj/machinery/atmospherics/unary/vent_found
+
+			if(clicked_on && Adjacent(clicked_on))
+				vent_found = clicked_on
+				if(!istype(vent_found) || !vent_found.can_crawl_through())
+					vent_found = null
+
+
+			if(!vent_found)
+				for(var/obj/machinery/atmospherics/machine in range(1,src))
+					if(is_type_in_list(machine, ventcrawl_machinery))
+						vent_found = machine
+
+					if(!vent_found.can_crawl_through())
+						vent_found = null
+
+					if(vent_found)
+						break
 
 			if(vent_found)
-				if(vent_found.network&&vent_found.network.normal_members.len)
-					var/list/vents[0]
-					for(var/obj/machinery/atmospherics/unary/vent_pump/temp_vent in vent_found.network.normal_members)
-						if(temp_vent.loc == loc)
-							continue
-						if(temp_vent.welded)
-							continue
-						var/turf/T = get_turf(temp_vent)
+				if(vent_found.network && (vent_found.network.normal_members.len || vent_found.network.line_members.len))
 
-						if(!T || T.z != loc.z)
-							continue
-
-						var/i = 1
-						var/index = "[T.loc.name]\[[i]\]"
-						while(index in vents)
-							i++
-							index = "[T.loc.name]\[[i]\]"
-						vents[index] = temp_vent
-
-					var/turf/startloc = loc
-					var/obj/selection = input("Select a destination.", "Duct System") as null|anything in sortList(vents)
-					if(!selection)
-						src << "\red You didn't choose anything."
+					src << "You begin climbing into the ventilation system..."
+					if(!do_after(src, 45,,0))
 						return
 
-					if(!do_after(src, 45))
+					if(!client)
 						return
 
-					if(!src||!selection)
-						return
+					if(contents.len && !isrobot(src))
+						for(var/obj/item/carried_item in contents)//If the ventcrawler got on objects.
+							if(!(isInTypes(carried_item, canEnterVentWith)))
+								src << "<SPAN CLASS='warning'>You can't be carrying items or have items equipped when vent crawling!</SPAN>"
+								return
 
-					if(loc==startloc)
-						if(contents.len && !isrobot(src))
-							for(var/obj/item/carried_item in contents)//If the ventcrawler got on objects.
-								if(!(isInTypes(carried_item, canEnterVentWith)))
-									src << "<SPAN CLASS='warning'>You can't be carrying items or have items equipped when vent crawling!</SPAN>"
-									return
-						var/obj/machinery/atmospherics/unary/vent_pump/target_vent = vents[selection]
-						if(target_vent)
-							for(var/mob/O in viewers(src, null))
-								O.show_message(text("<B>[src] scrambles into the ventilation ducts!</B>"), 1)
-							loc = target_vent
+					visible_message("<B>[src] scrambles into the ventilation ducts!</B>", "You climb into the ventilation system.")
 
-							var/travel_time = round(get_dist(loc, target_vent.loc) / 4)
+					loc = vent_found
+					add_ventcrawl(vent_found)
 
-							spawn(travel_time)
-
-								if(!target_vent)	return
-								for(var/mob/O in hearers(target_vent,null))
-									O.show_message("You hear something squeezing through the ventilation ducts.",2)
-
-								sleep(travel_time)
-
-								if(!target_vent)	return
-								if(target_vent.welded)			//the vent can be welded while alien scrolled through the list or travelled.
-									target_vent = vent_found 	//travel back. No additional time required.
-									src << "\red The vent you were heading to appears to be welded."
-								loc = target_vent.loc
-								var/area/new_area = get_area(loc)
-								if(new_area)
-									new_area.Entered(src)
-
-					else
-						src << "You need to remain still while entering a vent."
 				else
 					src << "This vent is not connected to anything."
 
@@ -338,6 +310,21 @@
 		src << "You must be conscious to do this!"
 	return
 
+/mob/living/proc/add_ventcrawl(obj/machinery/atmospherics/unary/starting_machine)
+	for(var/datum/pipeline/pipeline in starting_machine.network.line_members)
+		for(var/atom/A in (pipeline.members || pipeline.edges))
+			var/image/new_image = image(A, A.loc, dir = A.dir)
+			pipes_shown += new_image
+			client.images += new_image
+
+/mob/living/proc/remove_ventcrawl()
+	for(var/image/current_image in pipes_shown)
+		client.images -= current_image
+
+	pipes_shown.len = 0
+
+	if(client)
+		client.eye = src
 
 /mob/living/carbon/clean_blood()
 	. = ..()
@@ -381,7 +368,7 @@
 		return
 
 	if(!istype(loc,/turf))
-		src << "\red You can't do that now!"
+		src << "<span class='warning'>You can't do that now!</span>"
 		return
 
 	if(target.type == /obj/screen) return
@@ -430,7 +417,7 @@
 	//actually throw it!
 	if (item)
 		item.layer = initial(item.layer)
-		src.visible_message("\red [src] has thrown [item].")
+		src.visible_message("<span class='warning'>[src] has thrown [item].</span>")
 
 		if((istype(src.loc, /turf/space)) || (src.areaMaster.has_gravity == 0))
 			var/mob/space_obj=src
@@ -574,7 +561,7 @@
 	set category = "IC"
 
 	if(usr.sleeping)
-		usr << "\red You are already sleeping"
+		usr << "<span class='warning'>You are already sleeping</span>"
 		return
 	if(alert(src,"Are you sure you want to sleep for a while?","Sleep","Yes","No") == "Yes")
 		usr.sleeping = 150 //Long nap of 5 minutes. Those are MC TICKS. Don't get fooled
@@ -596,8 +583,8 @@
 
 	if(B.controlling)
 		if(rptext)
-			src << "\red <B>You withdraw your probosci, releasing control of [B.host_brain]</B>"
-			B.host_brain << "\red <B>Your vision swims as the alien parasite releases control of your body.</B>"
+			src << "<span class='danger'>You withdraw your probosci, releasing control of [B.host_brain]</span>"
+			B.host_brain << "<span class='danger'>Your vision swims as the alien parasite releases control of your body.</span>"
 		B.ckey = ckey
 		B.controlling = 0
 	if(B.host_brain.ckey)
@@ -622,8 +609,8 @@
 		return
 
 	if(B.host_brain.ckey)
-		src << "\red <B>You send a punishing spike of psychic agony lancing into your host's brain.</B>"
-		B.host_brain << "\red <B><FONT size=3>Horrific, burning agony lances through you, ripping a soundless scream from your trapped mind!</FONT></B>"
+		src << "<span class='danger'>You send a punishing spike of psychic agony lancing into your host's brain.</span>"
+		B.host_brain << "<span class='danger'><FONT size=3>Horrific, burning agony lances through you, ripping a soundless scream from your trapped mind!</FONT></span>"
 
 //Check for brain worms in head.
 /mob/proc/has_brain_worms()
@@ -645,14 +632,14 @@
 		return
 
 	if(B.chemicals >= 100)
-		src << "\red You strain, trying to push out your young..."
+		src << "<span class='warning'>You strain, trying to push out your young...</span>"
 		var/mob/dead/observer/O = B.request_player()
 		if(!O)
 			// No spaceghoasts.
 			src << "<span class='warning'>Your young are not ready yet.</span>"
 		else
-			src << "\red <B>Your host twitches and quivers as you rapidly excrete several larvae from your sluglike body.</B>"
-			visible_message("\red <B>[src] heaves violently, expelling a rush of vomit and a wriggling, sluglike creature!</B>")
+			src << "<span class='danger'>Your host twitches and quivers as you rapidly excrete several larvae from your sluglike body.</span>"
+			visible_message("<span class='danger'>[src] heaves violently, expelling a rush of vomit and a wriggling, sluglike creature!</span>")
 			B.chemicals -= 100
 
 			B.numChildren++
@@ -669,3 +656,8 @@
 
 /mob/living/carbon/is_muzzled()
 	return(istype(src.wear_mask, /obj/item/clothing/mask/muzzle))
+
+
+/mob/living/carbon/proc/isInCrit()
+	// Health is in deep shit and we're not already dead
+	return (health < config.health_threshold_crit) && stat != 2

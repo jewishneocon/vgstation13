@@ -55,6 +55,11 @@
 	icon_state = "soup"
 
 /obj/item/trash/bowl/attackby(obj/item/I,mob/user)
+	if(istype(I,/obj/item/stack/sheet/metal))
+		var/obj/item/stack/sheet/metal/S = I
+		S.use(1)
+		new/obj/item/weapon/reagent_containers/mortar(get_turf(src))
+		qdel(src)
 	if(istype(I,/obj/item/weapon/shard) || istype(I,/obj/item/weapon/reagent_containers/food/snacks))
 		new/obj/item/weapon/reagent_containers/food/snacks/customizable/soup(get_turf(src),I)
 		qdel(src)
@@ -85,7 +90,7 @@
 		user << "<span class='warning'>How about no.</span>"
 	else if(istype(I,/obj/item/weapon/reagent_containers/food/snacks))
 		var/obj/item/weapon/reagent_containers/food/snacks/S = I
-		user.drop_item(src)
+		user.drop_item(I, src)
 		src.ingredients += S
 		S.reagents.trans_to(src,S.reagents.total_volume)
 		src.update()
@@ -111,12 +116,15 @@
 			src.overlays += I.overlays
 		else
 			I = new(src.icon,"[initial(src.icon_state)]_filling")
-			if(S.filling_color == "#FFFFFF") I.color = pick("#FF0000","#0000FF","#008000","#FFFF00")
-			else I.color = S.filling_color
+			if(S.filling_color != "#FFFFFF")
+				I.color = S.filling_color
+			else
+				I.color = AverageColor(build_composite_icon(S), 1, 1)
 			if(src.stackIngredients)
 				I.pixel_x = rand(-1,1)
 				I.pixel_y = (i*2)+1
-			else src.overlays.len = 0
+			else
+				src.overlays.len = 0
 			src.overlays += I
 	if(src.addTop)
 		I = image(src.icon,,"src.[icon_state]_top")
@@ -286,7 +294,7 @@
 	else if(istype(I,/obj/item/weapon/reagent_containers/food/snacks))
 		if(src.ingredients.len < src.ingMax)
 			var/obj/item/weapon/reagent_containers/food/snacks/S = I
-			user.drop_item(src)
+			user.drop_item(I, src)
 			user << "<span class='notice'>You add the [S.name] to the [src.name].</span>"
 			S.reagents.trans_to(src,S.reagents.total_volume)
 			src.ingredients += S

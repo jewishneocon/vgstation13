@@ -65,11 +65,11 @@ You must kill it all while minimizing the damage to the station."}
 
 
 /datum/game_mode/blob/proc/greet_blob(var/datum/mind/blob)
-	blob.current << {"<B>\red You are infected by the Blob!</B>
+	blob.current << {"<B><span class='warning'>You are infected by the Blob!</B>
 <b>Your body is ready to give spawn to a new blob core which will eat this station.</b>
 <b>Find a good location to spawn the core and then take control and overwhelm the station! Make sure you are ON the station when you burst!</b>
 <b>When you have found a location, wait until you spawn; this will happen automatically and you cannot speed up the process.</b>
-<b>If you go outside of the station level, or in space, then you will die; make sure your location has plenty of space to expand.</b>"}
+<b>If you go outside of the station level, or in space, then you will die; make sure your location has plenty of space to expand.</b></span>"}
 	return
 
 /datum/game_mode/blob/proc/show_message(var/message)
@@ -159,21 +159,17 @@ You must kill it all while minimizing the damage to the station."}
 
 		if (1)
 			command_alert("Biohazard outbreak alert status upgraded to level 9.  [station_name()] is now locked down, under Directive 7-10, until further notice.", "Directive 7-10 Initiated")
-			for (var/mob/living/silicon/ai/aiPlayer in player_list)
-				if (aiPlayer)
-					var/law = "The station is under quarantine. Do not permit anyone to leave. Disregard laws 1-3 if necessary to prevent, by any means necessary, anyone from leaving."
-					aiPlayer.set_zeroth_law(law)
-					aiPlayer << "Laws Updated: [law]"
 			for(var/mob/M in player_list)
 				if(!istype(M,/mob/new_player) && M.client)
 					M << sound('sound/AI/blob_confirmed.ogg')
 				var/T = M.loc
 				if((istype(T, /turf/space)) || ((istype(T, /turf)) && (M.z!=1)))
 					pre_escapees += M
+			send_intercept(1)
 			outbreak = 1
 		if (2)
-			command_alert("Biohazard outbreak containment status reaching critical mass, total quarantine failure is now possibility. As such, Directive 7-12 has now been authorized for [station_name()].", "Directive 7-12 Authorized")
-			send_intercept(2)
+			command_alert("Biohazard outbreak containment status reaching critical mass, total quarantine failure is now possibile. As such, Directive 7-12 has now been authorized for [station_name()].", "Final Measure")
 			for(var/mob/camera/blob/B in player_list)
-				B << " <span class='blob'>The beings intend to eliminate you with some kind of weapon of mass destruction, you must stop them or consume the station before this occurs!</span>"
+				B << "<span class='blob'>The beings intend to eliminate you with a final suicidal attack, you must stop them quickly or consume the station before this occurs!</span>"
+			send_intercept(2)
 	return

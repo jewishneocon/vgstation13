@@ -110,8 +110,10 @@ var/list/admin_verbs_fun = list(
 	/client/proc/delete_all_adminbus,
 	/client/proc/delete_all_bomberman,
 	/client/proc/create_bomberman_arena,
+	/client/proc/control_bomberman_arena,
 	/client/proc/gib_money, // /vg/
 	/client/proc/smissmas,
+	/client/proc/achievement,
 	)
 var/list/admin_verbs_spawn = list(
 	/datum/admins/proc/spawn_atom,		/*allows us to spawn instances*/
@@ -398,13 +400,13 @@ var/list/admin_verbs_mod = list(
 	if(holder && mob)
 		if(mob.invisibility == INVISIBILITY_OBSERVER)
 			mob.invisibility = initial(mob.invisibility)
-			mob << "\red <b>Invisimin off. Invisibility reset.</b>"
+			mob << "<span class='danger'>Invisimin off. Invisibility reset.</span>"
 			mob.icon_state = "ghost"
 			mob.icon = 'icons/mob/human.dmi'
 			mob.update_icons()
 		else
 			mob.invisibility = INVISIBILITY_OBSERVER
-			mob << "\blue <b>Invisimin on. You are now as invisible as a ghost.</b>"
+			mob << "<span class='notice'><b>Invisimin on. You are now as invisible as a ghost.</b></span>"
 			mob.icon_state = "ghost"
 			mob.icon = 'icons/mob/mob.dmi'
 
@@ -603,7 +605,7 @@ var/list/admin_verbs_mod = list(
 			var/light_impact_range = input("Light impact range (in tiles):") as num
 			var/flash_range = input("Flash range (in tiles):") as num
 			explosion(epicenter, devastation_range, heavy_impact_range, light_impact_range, flash_range)
-	message_admins("\blue [ckey] creating an admin explosion at [epicenter.loc].")
+	message_admins("<span class='notice'>[ckey] creating an admin explosion at [epicenter.loc].</span>")
 	feedback_add_details("admin_verb","DB") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
 /client/proc/give_spell(mob/T as mob in mob_list) // -- Urist
@@ -615,7 +617,7 @@ var/list/admin_verbs_mod = list(
 	T.spell_list += new S
 	feedback_add_details("admin_verb","GS") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 	log_admin("[key_name(usr)] gave [key_name(T)] the spell [S].")
-	message_admins("\blue [key_name_admin(usr)] gave [key_name(T)] the spell [S].", 1)
+	message_admins("<span class='notice'>[key_name_admin(usr)] gave [key_name(T)] the spell [S].</span>", 1)
 
 /client/proc/give_disease(mob/T as mob in mob_list) // -- Giacom
 	set category = "Fun"
@@ -626,7 +628,7 @@ var/list/admin_verbs_mod = list(
 	T.contract_disease(new D, 1)
 	feedback_add_details("admin_verb","GD") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 	log_admin("[key_name(usr)] gave [key_name(T)] the disease [D].")
-	message_admins("\blue [key_name_admin(usr)] gave [key_name(T)] the disease [D].", 1)
+	message_admins("<span class='notice'>[key_name_admin(usr)] gave [key_name(T)] the disease [D].</span>", 1)
 
 /client/proc/make_sound(var/obj/O in world) // -- TLE
 	set category = "Special Verbs"
@@ -679,7 +681,7 @@ var/list/admin_verbs_mod = list(
 		usr << "<b>Disabled air processing.</b>"
 	feedback_add_details("admin_verb","KA") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 	log_admin("[key_name(usr)] used 'kill air'.")
-	message_admins("\blue [key_name_admin(usr)] used 'kill air'.", 1)
+	message_admins("<span class='notice'>[key_name_admin(usr)] used 'kill air'.</span>", 1)
 
 /client/proc/deadmin_self()
 	set name = "De-admin self"
@@ -732,7 +734,7 @@ var/list/admin_verbs_mod = list(
 	if(!check_rights(R_FUN))	return
 
 	if(!istype(M, /mob/living/carbon/human))
-		usr << "\red You can only do this to humans!"
+		usr << "<span class='warning'>You can only do this to humans!</span>"
 		return
 	switch(alert("Are you sure you wish to edit this mob's appearance? Skrell, Unathi, Vox and Tajaran can result in unintended consequences.",,"Yes","No"))
 		if("No")
@@ -844,7 +846,7 @@ var/list/admin_verbs_mod = list(
 	T << "<span class='notice'>Move on.</span>"
 
 	log_admin("[key_name(usr)] told [key_name(T)] to man up and deal with it.")
-	message_admins("\blue [key_name_admin(usr)] told [key_name(T)] to man up and deal with it.", 1)
+	message_admins("<span class='notice'>[key_name_admin(usr)] told [key_name(T)] to man up and deal with it.</span>", 1)
 
 /client/proc/global_man_up()
 	set category = "Fun"
@@ -856,7 +858,7 @@ var/list/admin_verbs_mod = list(
 		T << 'sound/voice/ManUp1.ogg'
 
 	log_admin("[key_name(usr)] told everyone to man up and deal with it.")
-	message_admins("\blue [key_name_admin(usr)] told everyone to man up and deal with it.", 1)
+	message_admins("<span class='notice'>[key_name_admin(usr)] told everyone to man up and deal with it.</span>", 1)
 
 
 /client/proc/readmin()
@@ -902,3 +904,45 @@ var/list/admin_verbs_mod = list(
 			verbs -= /client/proc/readmin
 			return
 		usr << "query.nextrow() failed"
+
+/client/proc/achievement()
+	set name = "Give Achievement"
+	set category = "Fun"
+
+	if(!check_rights(R_FUN))	return
+
+	var/achoice = "Cancel"
+
+	if(!player_list.len)
+		usr << "player list is empty!"
+		return
+
+	var/mob/winner = input("Who's a winner?", "Achievement Winner") in player_list
+	var/name = input("What will you call your achievement?", "Achievement Winner", "New Achievement")
+	var/desc = input("What description will you give it?", "Achievement Description", "You Win")
+
+	if(istype(winner, /mob/living))
+		achoice = alert("Give our winner his own trophy?","Achievement Trophy", "Confirm","Cancel")
+
+	var/glob = alert("Announce the achievement globally? (Beware! Ruins immersion!)","Last Question", "No!","Yes!")
+
+	if(achoice == "Confirm")
+		var/obj/item/weapon/reagent_containers/food/drinks/golden_cup/C = new(get_turf(winner))
+		C.name = name
+		C.desc = desc
+		winner.put_in_hands(C)
+		winner.update_icons()
+	else
+		winner << "<span class='danger'>You win [name]! [desc]</span>"
+
+	var/icon/cup = icon('icons/obj/drinks.dmi', "golden_cup")
+
+	if(glob == "No!")
+		winner.client << sound('sound/misc/achievement.ogg')
+	else
+		world  << sound('sound/misc/achievement.ogg')
+		world << "<span class='danger'>\icon[cup] <b>[winner.name]</b> wins \"<b>[name]</b>\"!</span>"
+
+	winner << "<span class='danger'>Congratulations!</span>"
+
+	achievements += "<b>[winner.key]</b> as <b>[winner.name]</b> won \"<b>[name]</b>\"! \"[desc]\""

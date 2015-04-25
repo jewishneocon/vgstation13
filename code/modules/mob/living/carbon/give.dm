@@ -9,6 +9,9 @@
 
 	if(src.stat == 2 || user.stat == 2 || src.client == null)
 		return
+	if(src.handcuffed)
+		user << "<span class='warning'>Those hands are cuffed right now.</span>"
+		return //Can't receive items while cuffed
 	if(src == user) //Shouldn't happen
 		user << "<span class='warning'>You feel stupider, suddenly.</span>"
 		return
@@ -37,7 +40,7 @@
 					user << "<span class='warning'>Their hands are full.</span>"
 					return
 				else
-					user.drop_item()
+					user.drop_item(I)
 					src.put_in_hands(I)
 				I.loc = src
 				I.layer = 20

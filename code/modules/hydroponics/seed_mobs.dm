@@ -14,13 +14,11 @@
 			if(!host.ckey && !host.client)
 				host.death()  // This seems redundant, but a lot of mobs don't
 				host.stat = 2 // handle death() properly. Better safe than etc.
-				host.visible_message("\red <b>[host] is malformed and unable to survive. It expires pitifully, leaving behind some seeds.")
+				host.visible_message("<span class='warning'><b>[host] is malformed and unable to survive. It expires pitifully, leaving behind some seeds.</span>")
 
-				var/total_yield = rand(1,3)
-				for(var/j = 0;j<=total_yield;j++)
-					var/obj/item/seeds/S = new(get_turf(host))
-					S.seed_type = name
-					S.update_seed()
+				var/obj/item/seeds/S = new(get_turf(host))
+				S.seed_type = name
+				S.update_seed()
 
 /datum/seed/proc/request_player(var/mob/living/host)
 	if(!host) return
@@ -50,7 +48,7 @@
 	// Update mode specific HUD icons.
 	callHook("harvest_podman", list(host))
 
-	host << "\green <B>You awaken slowly, stirring into sluggish motion as the air caresses you.</B>"
+	host << "<span class='good'><B>You awaken slowly, stirring into sluggish motion as the air caresses you.</B></span>"
 
 	// This is a hack, replace with some kind of species blurb proc.
 	if(istype(host,/mob/living/carbon/monkey/diona))

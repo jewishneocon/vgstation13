@@ -1,3 +1,24 @@
+/mob/living/New()
+	. = ..()
+	generate_static_overlay()
+	if(static_overlays.len)
+		for(var/mob/living/silicon/robot/mommi/MoMMI in player_list)
+			if(MoMMI.can_see_static())
+				if(MoMMI.static_choice in static_overlays)
+					MoMMI.static_overlays.Add(static_overlays[MoMMI.static_choice])
+					MoMMI.client.images.Add(static_overlays[MoMMI.static_choice])
+				else
+					MoMMI.static_overlays.Add(static_overlays["static"])
+					MoMMI.client.images.Add(static_overlays["static"])
+
+/mob/living/Destroy()
+	for(var/mob/living/silicon/robot/mommi/MoMMI in player_list)
+		for(var/image/I in static_overlays)
+			MoMMI.static_overlays.Remove(I) //no checks, since it's either there or its not
+			MoMMI.client.images.Remove(I)
+			del(I)
+	static_overlays.len = 0
+	. = ..()
 
 /mob/living/Life()
 	..()
@@ -37,7 +58,7 @@
 				if(src.mind in ticker.mode.traitors)
 					ticker.mode.traitors -= src.mind
 					special_role = null
-					current << "\red <FONT size = 3><B>The fog clouding your mind clears. You remember nothing from the moment you were implanted until now..(You don't remember who enslaved you)</B></FONT>"
+					current << "<span class='danger'><FONT size = 3>The fog clouding your mind clears. You remember nothing from the moment you were implanted until now..(You don't remember who enslaved you)</FONT></span>"
 				*/
 
 // Apply connect damage
@@ -50,7 +71,7 @@
 	apply_beam_damage(B)
 	last_beamchecks.Remove("\ref[B]") // RIP
 
-/mob/living/proc/handle_beams()
+/mob/living/handle_beams()
 	if(flags & INVULNERABLE)
 		return
 	// New beam damage code (per-tick)
@@ -89,7 +110,7 @@
 	else
 		dust()
 
-/mob/living/proc/apply_beam_damage(var/obj/effect/beam/B)
+/mob/living/apply_beam_damage(var/obj/effect/beam/B)
 	var/lastcheck=last_beamchecks["\ref[B]"]
 
 	// Figure out how much damage to deal.
@@ -299,15 +320,6 @@
 			if(istype(D.wrapped, /obj/item/weapon/storage)) //this should never happen
 				L += get_contents(D.wrapped)
 		return L
-
-/mob/living/check_contents_for(A)
-	var/list/L = src.get_contents()
-
-	for(var/obj/B in L)
-		if(B.type == A)
-			return B
-	return 0
-
 
 /mob/living/proc/can_inject()
 	return 1
@@ -544,28 +556,31 @@
 			else
 				diag = null
 			if ((get_dist(src, pulling) > 1 || diag))
-				if (isliving(pulling))
-					var/mob/living/M = pulling
-					var/ok = 1
-					if (locate(/obj/item/weapon/grab, M.grabbed_by))
-						if (prob(75))
-							var/obj/item/weapon/grab/G = pick(M.grabbed_by)
-							if (istype(G, /obj/item/weapon/grab))
-								visible_message("<span class='danger'>[src] has pulled [G.affecting] from [G.assailant]'s grip.</span>")
-								qdel(G)
-						else
-							ok = 0
-						if (locate(/obj/item/weapon/grab, M.grabbed_by.len))
-							ok = 0
-					if (ok)
-						var/atom/movable/t = M.pulling
-						M.stop_pulling()
-						pulling.Move(T, get_dir(pulling, T))
-						if(M)
-							M.start_pulling(t)
+				if(isturf(pulling.loc))
+					if (isliving(pulling))
+						var/mob/living/M = pulling
+						var/ok = 1
+						if (locate(/obj/item/weapon/grab, M.grabbed_by))
+							if (prob(75))
+								var/obj/item/weapon/grab/G = pick(M.grabbed_by)
+								if (istype(G, /obj/item/weapon/grab))
+									visible_message("<span class='danger'>[src] has pulled [G.affecting] from [G.assailant]'s grip.</span>")
+									qdel(G)
+							else
+								ok = 0
+							if (locate(/obj/item/weapon/grab, M.grabbed_by.len))
+								ok = 0
+						if (ok)
+							var/atom/movable/t = M.pulling
+							M.stop_pulling()
+							pulling.Move(T, get_dir(pulling, T))
+							if(M)
+								M.start_pulling(t)
+					else
+						if (pulling)
+							pulling.Move(T, get_dir(pulling, T))
 				else
-					if (pulling)
-						pulling.Move(T, get_dir(pulling, T))
+					stop_pulling()
 	else
 		stop_pulling()
 		. = ..()
@@ -870,6 +885,21 @@
 	usr.visible_message("<b>[src]</b> points to [A]")
 	return 1
 
+
+/mob/living/proc/generate_static_overlay()
+	static_overlays.Add(list("static", "blank", "letter"))
+	var/image/static_overlay = image(getStaticIcon(new/icon(src.icon, src.icon_state)), loc = src)
+	static_overlay.override = 1
+	static_overlays["static"] = static_overlay
+
+	static_overlay = image(getBlankIcon(new/icon(src.icon, src.icon_state)), loc = src)
+	static_overlay.override = 1
+	static_overlays["blank"] = static_overlay
+
+	static_overlay = getLetterImage(src)
+	static_overlay.override = 1
+	static_overlays["letter"] = static_overlay
+
 /*one proc, four uses
 swapping: if it's 1, the mobs are trying to switch, if 0, non-passive is pushing passive
 default behaviour is:
@@ -969,6 +999,8 @@ default behaviour is:
 
 				if (!AM.anchored)
 					var/t = get_dir(src, AM)
+					if(AM.flags & ON_BORDER && !t)
+						t = AM.dir
 					if (istype(AM, /obj/structure/window/full))
 						for(var/obj/structure/window/win in get_step(AM,t))
 							now_pushing = 0

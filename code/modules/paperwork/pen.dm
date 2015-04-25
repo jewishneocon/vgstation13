@@ -118,18 +118,24 @@ var/paperwork_library
 
 	
 /datum/writing_style/proc/Format(var/t, var/obj/item/weapon/pen/P, var/mob/user, var/obj/item/weapon/paper/paper)
-	if(paperwork) 
+	if(paperwork)
 		t = parse_markdown(t)
 	else
+		var/count = 0
 		if(expressions.len)
 			for(var/key in expressions)
+				if(count >= 500)
+					break
+				count++
 				var/datum/speech_filter_action/SFA = expressions[key]
 				if(SFA && !SFA.broken)
 					t = SFA.Run(t,user,paper)
+				if(count%100 == 0)
+					sleep(1) //too much for us.
 		t = replacetext(t, "\[sign\]", "<font face=\"Times New Roman\"><i>[user.real_name]</i></font>")
 		t = replacetext(t, "\[field\]", "<span class=\"paper_field\"></span>")
 	return "<span style=\"[style];color:[P.color]\">[t]</span>"
-	
+
 /datum/writing_style/pen/New()
 	addReplacement(REG_BBTAG("*"), "<li>")
 	addReplacement(REG_BBTAG("hr"), "<HR>")
@@ -193,7 +199,7 @@ var/paperwork_library
 		return style.Format(text,src,user,P)
 
 /obj/item/weapon/pen/suicide_act(mob/user)
-	viewers(user) << "\red <b>[user]is jamming the [src.name]into \his ear! It looks like \he's trying to commit suicide.</b>"
+	viewers(user) << "<span class='danger'>[user]is jamming the [src.name]into \his ear! It looks like \he's trying to commit suicide.</span>"
 	return(OXYLOSS)
 
 /obj/item/weapon/pen/blue
@@ -216,7 +222,7 @@ var/paperwork_library
 	if(!ismob(M))
 		return
 	user << "<span class='warning'>You stab [M] with the pen.</span>"
-	M << "\red You feel a tiny prick!"
+	M << "<span class='warning'>You feel a tiny prick!</span>"
 	M.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has been stabbed with [name]  by [user.name] ([user.ckey])</font>")
 	user.attack_log += text("\[[time_stamp()]\] <font color='red'>Used the [name] to stab [M.name] ([M.ckey])</font>")
 	msg_admin_attack("[user.name] ([user.ckey]) Used the [name] to stab [M.name] ([M.ckey]) (<A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[user.x];Y=[user.y];Z=[user.z]'>JMP</a>)")

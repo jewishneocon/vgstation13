@@ -94,7 +94,7 @@
 		if(isrobot(user) && !isMoMMI(user)) // MoMMI's can but borgs can't
 			user << "You're a robot. No."
 			return
-		user.drop_item(src)
+		user.drop_item(W, src)
 		user << "You cram \the [W] into the nozzle of \the [src]."
 		message_admins("[user]/[user.ckey] has crammed \a [W] into a [src].")
 
@@ -103,7 +103,7 @@
 		if((istype(target, /obj/structure/reagent_dispensers)))
 			var/obj/o = target
 			var/list/badshit=list()
-			for(var/bad_reagent in src.reagents_to_log)
+			for(var/bad_reagent in reagents_to_log)
 				if(o.reagents.has_reagent(bad_reagent))
 					badshit += reagents_to_log[bad_reagent]
 			if(badshit.len)
@@ -132,7 +132,7 @@
 			return
 		user.delayNextAttack(5, 1)
 		var/list/badshit=list()
-		for(var/bad_reagent in src.reagents_to_log)
+		for(var/bad_reagent in reagents_to_log)
 			if(reagents.has_reagent(bad_reagent))
 				badshit += reagents_to_log[bad_reagent]
 		if(badshit.len)

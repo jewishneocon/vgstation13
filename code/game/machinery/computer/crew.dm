@@ -51,7 +51,7 @@
 /obj/machinery/computer/crew/Topic(href, href_list)
 	if(..()) return
 	if (src.z > 6)
-		usr << "\red <b>Unable to establish a connection</b>: \black You're too far away from the station!"
+		usr << "<span class='danger'>Unable to establish a connection: </span>You're too far away from the station!"
 		return 0
 	if( href_list["close"] )
 		if(usr.machine == src) usr.unset_machine()
@@ -77,7 +77,7 @@
 
 		var/turf/pos = get_turf(C)
 
-		if((C) && (C.has_sensor) && (pos) && (pos.z == src.z) && C.sensor_mode)
+		if((C) && (C.has_sensor) && (pos) && (pos.z != CENTCOMM_Z) && C.sensor_mode)
 			if(istype(C.loc, /mob/living/carbon/human))
 
 				var/mob/living/carbon/human/H = C.loc
@@ -143,7 +143,7 @@
 		return
 
 /obj/machinery/computer/crew/proc/is_scannable(const/obj/item/clothing/under/C, const/mob/living/carbon/human/H)
-	if(!istype(H))
+	if(!istype(H) || H.iscorpse)
 		return 0
 
 	if(isnull(track_special_role))

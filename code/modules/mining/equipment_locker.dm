@@ -39,7 +39,7 @@
 			return
 		var/obj/item/weapon/card/id/I = usr.get_active_hand()
 		if(istype(I))
-			usr.drop_item(src)
+			usr.drop_item(I, src)
 			inserted_id = I
 
 /obj/machinery/mineral/ore_redemption/proc/process_sheet(var/obj/item/weapon/ore/O)
@@ -61,6 +61,7 @@
 					continue // Skip slag for now.
 				if(O)
 					process_sheet(O)
+					score["oremined"] += 1
 				else
 					break
 		else
@@ -69,6 +70,7 @@
 				for(var/mat_id in B.materials.storage)
 					var/datum/material/mat = B.materials.getMaterial(mat_id)
 					materials.addAmount(mat_id,mat.stored)
+					score["oremined"] += mat.stored
 					credits += mat.value * mat.stored // Gimme my fucking credits
 					mat.stored=0
 
@@ -140,7 +142,7 @@
 		else if(href_list["choice"] == "insert")
 			var/obj/item/weapon/card/id/I = usr.get_active_hand()
 			if(istype(I))
-				usr.drop_item(src)
+				usr.drop_item(I, src)
 				inserted_id = I
 			else
 				usr << "<span class='warning'>No valid ID.</span>"
@@ -259,7 +261,7 @@
 		else if(href_list["choice"] == "insert")
 			var/obj/item/weapon/card/id/I = usr.get_active_hand()
 			if(istype(I))
-				usr.drop_item(src)
+				usr.drop_item(I, src)
 				inserted_id = I
 			else usr << "<span class='warning'>No valid ID.</span>"
 	if(href_list["purchase"])
@@ -291,7 +293,7 @@
 	if(istype(W,/obj/item/weapon/card/id))
 		var/obj/item/weapon/card/id/I = usr.get_active_hand()
 		if(istype(I))
-			usr.drop_item(src)
+			usr.drop_item(I, src)
 			inserted_id = I
 		return
 	..()

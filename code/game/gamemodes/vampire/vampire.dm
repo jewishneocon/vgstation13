@@ -87,21 +87,34 @@
 	..()
 	return
 
-/datum/game_mode/proc/auto_declare_completion_vampire()
+/datum/game_mode/proc/vampire_completion()
+	var/text = ""
 	if(vampires.len)
-		var/text = "<FONT size = 2><B>The vampires were:</B></FONT>"
+		var/icon/logo = icon('icons/mob/mob.dmi', "vampire-logo")
+		end_icons += logo
+		var/tempstate = end_icons.len
+		text += {"<br><img src="logo_[tempstate].png"> <FONT size = 2><B>The vampires were:</B></FONT> <img src="logo_[tempstate].png">"}
 		for(var/datum/mind/vampire in vampires)
 			var/traitorwin = 1
 
-			text += "<br>[vampire.key] was [vampire.name] ("
 			if(vampire.current)
+				var/icon/flat = getFlatIcon(vampire.current)
+				end_icons += flat
+				tempstate = end_icons.len
+				text += {"<br><img src="logo_[tempstate].png"> [vampire.key] was [vampire.name] ("}
 				if(vampire.current.stat == DEAD)
 					text += "died"
+					flat.Turn(90)
+					end_icons[tempstate] = flat
 				else
 					text += "survived"
 				if(vampire.current.real_name != vampire.name)
 					text += " as [vampire.current.real_name]"
 			else
+				var/icon/sprotch = icon('icons/effects/blood.dmi', "floor1-old")
+				end_icons += sprotch
+				tempstate = end_icons.len
+				text += {"<br><img src="logo_[tempstate].png"> [vampire.key] was [vampire.name] ("}
 				text += "body destroyed"
 			text += ")"
 
@@ -124,9 +137,12 @@
 				special_role_text = "antagonist"
 			if(vampire.total_TC)
 				if(vampire.spent_TC)
-					text += "<br><span class='sinister'>TC Remaining: [vampire.total_TC - vampire.spent_TC]/[vampire.total_TC] - The tools used by the Vampire were: [list2text(vampire.uplink_items_bought, ", ")]</span>"
+					text += "<br><span class='sinister'>TC Remaining: [vampire.total_TC - vampire.spent_TC]/[vampire.total_TC] - The tools used by the Vampire were:"
+					for(var/entry in vampire.uplink_items_bought)
+						text += "<br>[entry]"
+					text += "</span>"
 				else
-					text += "<span class='sinister'>The Vampire was a smooth operator this round (did not purchase any uplink items)</span>"
+					text += "<br><span class='sinister'>The Vampire was a smooth operator this round<br>(did not purchase any uplink items)</span>"
 			if(traitorwin)
 				text += "<br><font color='green'><B>The [special_role_text] was successful!</B></font>"
 				feedback_add_details("traitor_success","SUCCESS")
@@ -134,22 +150,34 @@
 				text += "<br><font color='red'><B>The [special_role_text] has failed!</B></font>"
 				feedback_add_details("traitor_success","FAIL")
 
-		world << text
-	return 1
+	return text
 
 /datum/game_mode/proc/auto_declare_completion_enthralled()
+	var/text = vampire_completion()
 	if(enthralled.len)
-		var/text = "<FONT size = 2><B>The Enthralled were:</B></FONT>"
+		var/icon/logo = icon('icons/mob/mob.dmi', "thrall-logo")
+		end_icons += logo
+		var/tempstate = end_icons.len
+		text += {"<FONT size = 2><img src="logo_[tempstate].png"> <B>The Enthralled were:</B> <img src="logo_[tempstate].png"></FONT>"}
 		for(var/datum/mind/Mind in enthralled)
-			text += "<br>[Mind.key] was [Mind.name] ("
 			if(Mind.current)
+				var/icon/flat = getFlatIcon(Mind.current)
+				end_icons += flat
+				tempstate = end_icons.len
+				text += {"<br><img src="logo_[tempstate].png"> [Mind.key] was [Mind.name] ("}
 				if(Mind.current.stat == DEAD)
 					text += "died"
+					flat.Turn(90)
+					end_icons[tempstate] = flat
 				else
 					text += "survived"
 				if(Mind.current.real_name != Mind.name)
 					text += " as [Mind.current.real_name]"
 			else
+				var/icon/sprotch = icon('icons/effects/blood.dmi', "floor1-old")
+				end_icons += sprotch
+				tempstate = end_icons.len
+				text += {"<br><img src="logo_[tempstate].png"> [Mind.key] was [Mind.name] ("}
 				text += "body destroyed"
 			text += ")"
 
@@ -158,9 +186,11 @@
 					text += "<br><span class='sinister'>TC Remaining: [Mind.total_TC - Mind.spent_TC]/[Mind.total_TC] - The tools used by the Enthralled were: [list2text(Mind.uplink_items_bought, ", ")]</span>"
 				else
 					text += "<span class='sinister'>The Enthralled was a smooth operator this round (did not purchase any uplink items)</span>"
-
-		world << text
-	return 1
+		text += "<BR><HR>"
+	else
+		if(text)
+			text += "<BR><HR>"
+	return text
 
 /datum/game_mode/proc/forge_vampire_objectives(var/datum/mind/vampire)
 	//Objectives are traitor objectives plus blood objectives
@@ -201,7 +231,7 @@
 /datum/game_mode/proc/greet_vampire(var/datum/mind/vampire, var/you_are=1)
 	var/dat
 	if (you_are)
-		dat = "<B>\red You are a Vampire! \black</br></B>"
+		dat = "<span class='danger'>You are a Vampire!</br></span>"
 	dat += {"To bite someone, target the head and use harm intent with an empty hand. Drink blood to gain new powers.
 You are weak to holy things and starlight. Don't go into space and avoid the Chaplain, the chapel and especially Holy Water."}
 	vampire.current << dat
@@ -319,7 +349,7 @@ You are weak to holy things and starlight. Don't go into space and avoid the Cha
 		bloodtotal = src.mind.vampire.bloodtotal
 		bloodusable = src.mind.vampire.bloodusable
 		if(!H.vessel.get_reagent_amount("blood"))
-			src << "\red They've got no blood left to give."
+			src << "<span class='warning'>They've got no blood left to give.</span>"
 			break
 		if(H.stat < 2) //alive
 			blood = min(10, H.vessel.get_reagent_amount("blood"))// if they have less than 10 blood, give them the remnant else they get 10 blood
@@ -365,7 +395,7 @@ You are weak to holy things and starlight. Don't go into space and avoid the Cha
 		vamp.powers |= VAMP_BATS
 		vamp.powers |= VAMP_SCREAM
 		// Commented out until we can figured out a way to stop this from spamming.
-		//src << "\blue Your rejuvination abilities have improved and will now heal you over time when used."
+		//src << "<span class='notice'>Your rejuvination abilities have improved and will now heal you over time when used.</span>"
 
 	// TIER 3.5 (/vg/)
 	if(vamp.bloodtotal >= 250)
@@ -503,7 +533,7 @@ You are weak to holy things and starlight. Don't go into space and avoid the Cha
 	update_vampire_icons_removed(vampire_mind)
 	vampire_mind.current.unsubLife(src)
 	//world << "Removed [vampire_mind.current.name] from vampire shit"
-	vampire_mind.current << "\red <FONT size = 3><B>The fog clouding your mind clears. You remember nothing from the moment you were enthralled until now.</B></FONT>"
+	vampire_mind.current << "<span class='danger'><FONT size = 3>The fog clouding your mind clears. You remember nothing from the moment you were enthralled until now.</FONT></span>"
 
 /mob/living/carbon/human/proc/check_sun()
 

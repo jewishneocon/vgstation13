@@ -958,7 +958,7 @@ var/list/RESTRICTED_CAMERA_NETWORKS = list( //Those networks can only be accesse
 #define SCREWTOGGLE		2 //does it toggle panel_open when hit by a screwdriver?
 #define CROWDESTROY		4 //does hitting a panel_open machine with a crowbar disassemble it?
 #define WRENCHMOVE		8 //does hitting it with a wrench toggle its anchored state?
-#define FIXED2WORK		16 //does it need to be anchored to work? Try to use this with WRENCHMOVE
+#define FIXED2WORK		16 //does it need to be anchored to work? Try to use this with WRENCHMOVE - hooks into power code
 #define EJECTNOTDEL		32 //when we destroy the machine, does it remove all its items or destroy them?
 #define WELD_FIXED		64 //if it is attacked by a welder and is anchored, it'll toggle between welded and unwelded to the floor
 
@@ -1116,3 +1116,9 @@ var/list/RESTRICTED_CAMERA_NETWORKS = list( //Those networks can only be accesse
 #define BUILD_FAILURE 0				//We failed so give an error message
 #define BUILD_SUCCESS 1			//Looks for a lattice to build.
 #define BUILD_IGNORE 2		//Ignores the need for lattice to build.
+
+
+#define ARENA_SETUP 0		//under construction/resetting the arena
+#define ARENA_AVAILABLE 1	//arena is ready for a new game
+#define ARENA_INGAME 2		//a game is currently being played in the arena
+#define ARENA_ENDGAME 3		//a game just finished and the arena is about to reset

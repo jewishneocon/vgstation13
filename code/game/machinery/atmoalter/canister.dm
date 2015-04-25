@@ -112,7 +112,7 @@
 		if (src.holding)
 			src.holding.loc = src.loc
 			src.holding = null
-
+		INVOKE_EVENT(on_destroyed, list())
 		return 1
 	else
 		return 1
@@ -122,6 +122,8 @@
 		return
 
 	..()
+
+	handle_beams() //emitter beams
 
 	if(valve_open)
 		var/datum/gas_mixture/environment
@@ -190,14 +192,14 @@
 /obj/machinery/portable_atmospherics/canister/attackby(var/obj/item/weapon/W as obj, var/mob/user as mob)
 	if(iswelder(W) && src.destroyed)
 		if(weld(W, user))
-			user << "\blue You salvage whats left of \the [src]"
+			user << "<span class='notice'>You salvage whats left of \the [src]</span>"
 			var/obj/item/stack/sheet/metal/M = getFromPool(/obj/item/stack/sheet/metal, get_turf(src))//new /obj/item/stack/sheet/metal(src.loc)
 			M.amount = 3
 			del src
 		return
 
 	if(!istype(W, /obj/item/weapon/wrench) && !istype(W, /obj/item/weapon/tank) && !istype(W, /obj/item/device/analyzer) && !istype(W, /obj/item/device/pda))
-		visible_message("\red [user] hits the [src] with a [W]!")
+		visible_message("<span class='warning'>[user] hits the [src] with a [W]!</span>")
 		investigation_log(I_ATMOS, "<span style='danger'>was smacked with \a [W] by [key_name(user)]</span>")
 		src.health -= W.force
 		src.add_fingerprint(user)
@@ -438,3 +440,30 @@
 		return 1
 	busy = 0
 	return 0
+
+/obj/machinery/portable_atmospherics/canister/apply_beam_damage(var/obj/effect/beam/B)
+	var/lastcheck=last_beamchecks["\ref[B]"]
+
+	var/damage = ((world.time - lastcheck)/10)  * (B.get_damage()/2)
+
+	// Actually apply damage
+	health -= damage
+
+	// Update check time.
+	last_beamchecks["\ref[B]"]=world.time
+
+// Apply connect damage
+/obj/machinery/portable_atmospherics/canister/beam_connect(var/obj/effect/beam/B)
+	..()
+	last_beamchecks["\ref[B]"]=world.time
+
+/obj/machinery/portable_atmospherics/canister/beam_disconnect(var/obj/effect/beam/B)
+	..()
+	apply_beam_damage(B)
+	last_beamchecks.Remove("\ref[B]") // RIP
+
+/obj/machinery/portable_atmospherics/canister/handle_beams()
+	// New beam damage code (per-tick)
+	for(var/obj/effect/beam/B in beams)
+		apply_beam_damage(B)
+	healthcheck()

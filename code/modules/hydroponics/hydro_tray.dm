@@ -9,6 +9,8 @@
 	flags = OPENCONTAINER
 	volume = 100
 
+	machine_flags = SCREWTOGGLE | CROWDESTROY | WRENCHMOVE | FIXED2WORK
+
 
 	var/draw_warnings = 1 //Set to 0 to stop it from drawing the alert lights.
 
@@ -113,7 +115,7 @@
 		"radium" =         list( -1.5,  0,   0.2 ),
 		"adminordrazine" = list(  1,    1,   1   ),
 		"robustharvest" =  list(  0,    0.2, 0   ),
-		"left4zed" =       list(  0,    0,   0.2 )
+		"left4zed" =       list( -0.1, -0.2, 2   )
 		)
 
 	// Mutagen list specifies minimum value for the mutation to take place, rather
@@ -379,7 +381,7 @@
 			if(weedkiller_reagents[R.id])
 				weedlevel -= weedkiller_reagents[R.id] * reagent_total
 			if(pestkiller_reagents[R.id])
-				pestlevel -= pestkiller_reagents[R.id] * reagent_total
+				pestlevel += pestkiller_reagents[R.id] * reagent_total //Pest reducing reagents have negative pest level
 
 			// Beneficial reagents have a few impacts along with health buffs.
 			if(beneficial_reagents[R.id])
@@ -595,8 +597,11 @@
 
 /obj/machinery/portable_atmospherics/hydroponics/attackby(var/obj/item/O as obj, var/mob/user as mob)
 
-	if (O.is_open_container())
+	if(O.is_open_container())
 		return 0
+
+	if(..())
+		return 1
 
 	if(istype(O, /obj/item/weapon/wirecutters) || istype(O, /obj/item/weapon/scalpel))
 
@@ -649,7 +654,7 @@
 		if(!seed)
 
 			var/obj/item/seeds/S = O
-			user.drop_item()
+			user.drop_item(S)
 
 			if(!S.seed)
 				user << "The packet seems to be empty. You throw it away."
@@ -707,7 +712,7 @@
 	else if ( istype(O, /obj/item/weapon/plantspray) )
 
 		var/obj/item/weapon/plantspray/spray = O
-		user.drop_item()
+		user.drop_item(spray)
 		toxins += spray.toxicity
 		pestlevel -= spray.pest_kill_str
 		weedlevel -= spray.weed_kill_str
@@ -733,7 +738,7 @@
 		if(seed)
 			user << "<span class='alert'>[src] is already occupied!</span>"
 		else
-			user.drop_item()
+			user.drop_item(O)
 			qdel(O)
 
 			var/obj/machinery/apiary/A = new(src.loc)
@@ -832,7 +837,7 @@
 	set category = "Object"
 	set src in view(1)
 
-	if(!usr || usr.stat || usr.restrained())
+	if(!usr || usr.stat || usr.restrained() || (usr.status_flags & FAKEDEATH))
 		return
 
 	closed_system = !closed_system
